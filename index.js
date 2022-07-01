@@ -11,7 +11,6 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-
 //mongoDB connection
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@todo.bjvfl.mongodb.net/?retryWrites=true&w=majority`;
@@ -42,7 +41,6 @@ async function run() {
   try {
     await client.connect();
     const tasksCollection = client.db("toDoTask").collection("task");
-   
 
     //add task
     app.post("/task", async (req, res) => {
@@ -55,11 +53,36 @@ async function run() {
     app.get("/tasks", async (req, res) => {
       const query = {};
       const cursor = tasksCollection.find(query);
-      const product = await cursor.toArray();
-      res.send(product);
+      const tasks = await cursor.toArray();
+      res.send(tasks);
     });
-
-   
+    //get single  task
+    app.get("/task/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const task = await tasksCollection.findOne(query);
+      res.send(task);
+    });
+    //update task: receive data from client
+    app.put("/task/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedTask = req.body;
+      console.log(updatedTask);
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          date: updatedTask.date,
+          
+        },
+      };
+      const result = await tasksCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
+      res.send(result);
+    });
     //delete tasks
     app.delete("/task/:id", async (req, res) => {
       const id = req.params.id;
@@ -67,10 +90,6 @@ async function run() {
       const result = await tasksCollection.deleteOne(query);
       res.send(result);
     });
-
-
-   
-    
   } finally {
     //here error or something
   }
