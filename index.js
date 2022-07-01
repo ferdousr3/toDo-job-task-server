@@ -21,33 +21,41 @@ const client = new MongoClient(uri, {
 });
 
 //jwt function
-// function verifyJWT(req, res, next) {
-//   const authHeader = req.headers.authorization;
-//   if (!authHeader) {
-//     return res.status(401).send({ message: "UnAuthorized access" });
-//   }
-//   const token = authHeader.split(" ")[1];
-//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
-//     if (err) {
-//       return res.status(403).send({ message: "Forbidden access" });
-//     }
-//     req.decoded = decoded;
-//     next();
-//   });
-// }
+function verifyJWT(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).send({ message: "UnAuthorized access" });
+  }
+  const token = authHeader.split(" ")[1];
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+    if (err) {
+      return res.status(403).send({ message: "Forbidden access" });
+    }
+    req.decoded = decoded;
+    next();
+  });
+}
 
 // api function
 async function run() {
   try {
     await client.connect();
     const tasksCollection = client.db("toDoTask").collection("task");
+    const usersCollection = client.db("toDoTask").collection("users");
 
     //add task
     app.post("/task", async (req, res) => {
       const newTask = req.body;
       const result = await tasksCollection.insertOne(newTask);
-      console.log(newTask);
       res.send(result);
+    });
+
+    // get task for per user
+    app.get("/singleTask",  async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const tasks = await tasksCollection.find(query).toArray();
+      return res.send(tasks);
     });
     //Get Task: Send data to client
     app.get("/tasks", async (req, res) => {
@@ -67,13 +75,11 @@ async function run() {
     app.put("/task/:id", async (req, res) => {
       const id = req.params.id;
       const updatedTask = req.body;
-      console.log(updatedTask);
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
       const updatedDoc = {
         $set: {
           date: updatedTask.date,
-          
         },
       };
       const result = await tasksCollection.updateOne(
@@ -89,6 +95,27 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const result = await tasksCollection.deleteOne(query);
       res.send(result);
+    });
+    // store user to database for make admin
+    app.put("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await usersCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      const token = jwt.sign(
+        { email: email },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "12h" }
+      );
+      res.send({ result, token });
     });
   } finally {
     //here error or something
