@@ -44,35 +44,36 @@ async function run() {
     const usersCollection = client.db("toDoTask").collection("users");
 
     //add task
-    app.post("/task", async (req, res) => {
+    app.post("/task", verifyJWT, async (req, res) => {
       const newTask = req.body;
       const result = await tasksCollection.insertOne(newTask);
       res.send(result);
     });
 
     // get task for per user
-    app.get("/singleTask",  async (req, res) => {
+    app.get("/singleTask", verifyJWT,  async (req, res) => {
       const email = req.query.email;
+      console.log(email);
       const query = { email: email };
       const tasks = await tasksCollection.find(query).toArray();
       return res.send(tasks);
     });
     //Get Task: Send data to client
-    app.get("/tasks", async (req, res) => {
-      const query = {};
-      const cursor = tasksCollection.find(query);
-      const tasks = await cursor.toArray();
-      res.send(tasks);
-    });
+    // app.get("/tasks", async (req, res) => {
+    //   const query = {};
+    //   const cursor = tasksCollection.find(query);
+    //   const tasks = await cursor.toArray();
+    //   res.send(tasks);
+    // });
     //get single  task
-    app.get("/task/:id", async (req, res) => {
+    app.get("/task/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const task = await tasksCollection.findOne(query);
       res.send(task);
     });
     //update task: receive data from client
-    app.put("/task/:id", async (req, res) => {
+    app.put("/task/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const updatedTask = req.body;
       const filter = { _id: ObjectId(id) };
@@ -90,7 +91,7 @@ async function run() {
       res.send(result);
     });
     //delete tasks
-    app.delete("/task/:id", async (req, res) => {
+    app.delete("/task/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await tasksCollection.deleteOne(query);
