@@ -13,7 +13,8 @@ app.use(express.json());
 
 //mongoDB connection
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@todo.bjvfl.mongodb.net/?retryWrites=true&w=majority`;
+// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@todo.bjvfl.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@todos.omr7xh3.mongodb.net/?retryWrites=true&w=majority&appName=todos`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
