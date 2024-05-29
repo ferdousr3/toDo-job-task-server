@@ -10,8 +10,9 @@ const port = process.env.PORT || 5000;
 
 const corsOptions = {
   origin: "https://to-do-job-task.vercel.app",
-  credentials:true,            
-    optionSuccessStatus:200
+   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+   credentials: true,
+   optionsSuccessStatus: 204,
 };
 
 // app
