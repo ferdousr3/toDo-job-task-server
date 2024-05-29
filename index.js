@@ -57,6 +57,7 @@ async function run() {
 
     //add task
     app.post("/task", verifyJWT, async (req, res) => {
+      res.header("Access-Control-Allow-Origin", "https://to-do-job-task.vercel.app");
       const newTask = req.body;
       const result = await tasksCollection.insertOne(newTask);
       res.send(result);
@@ -64,6 +65,7 @@ async function run() {
 
     // get task for per user
     app.get("/singleTask", verifyJWT,  async (req, res) => {
+       res.header("Access-Control-Allow-Origin", "https://to-do-job-task.vercel.app");
       const email = req.query.email;
       console.log(email);
       const query = { email: email };
@@ -79,6 +81,7 @@ async function run() {
     // });
     //get single  task
     app.get("/task/:id", verifyJWT, async (req, res) => {
+       res.header("Access-Control-Allow-Origin", "https://to-do-job-task.vercel.app");
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const task = await tasksCollection.findOne(query);
@@ -86,6 +89,7 @@ async function run() {
     });
     //update task: receive data from client
     app.put("/task/:id", verifyJWT, async (req, res) => {
+       res.header("Access-Control-Allow-Origin", "https://to-do-job-task.vercel.app");
       const id = req.params.id;
       const updatedTask = req.body;
       const filter = { _id: ObjectId(id) };
@@ -104,6 +108,7 @@ async function run() {
     });
     //delete tasks
     app.delete("/task/:id", verifyJWT, async (req, res) => {
+       res.header("Access-Control-Allow-Origin", "https://to-do-job-task.vercel.app");
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await tasksCollection.deleteOne(query);
@@ -111,6 +116,7 @@ async function run() {
     });
     // store user to database for make admin
     app.put("/user/:email", async (req, res) => {
+       res.header("Access-Control-Allow-Origin", "https://to-do-job-task.vercel.app");
       const email = req.params.email;
       const user = req.body;
       const filter = { email: email };
